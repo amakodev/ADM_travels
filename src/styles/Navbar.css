@@ -1,0 +1,238 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: transparent;
+  backdrop-filter: blur(5px);
+  padding: 1rem 0;
+  z-index: 1000;
+  transition: all 0.4s ease;
+  animation: navFadeIn 0.6s ease forwards;
+}
+
+/* When scrolled — solid navy with shadow */
+.navbar.scrolled {
+  background: rgba(0, 51, 102, 0.98);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  padding: 0.75rem 0;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo Section */
+.navbar-logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+.navbar-logo-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.navbar-company-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.navbar-logo:hover .navbar-company-name {
+  color: #f5deb3;
+}
+
+/* Desktop Menu */
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li {
+  position: relative;
+}
+
+.navbar-menu li a {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
+.navbar-menu li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #f5deb3;
+  transition: width 0.3s ease;
+}
+
+.navbar-menu li a:hover {
+  color: #f5deb3;
+}
+
+.navbar-menu li a:hover::after {
+  width: 100%;
+}
+
+/* Fade animation for load */
+@keyframes navFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+
+  .navbar-logo {
+    font-size: 1.5rem;
+  }
+
+  /* Hide desktop menu */
+  .navbar-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Shift to exact center */
+    background: rgba(0, 51, 102, 0.98);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+    border-radius: 8px;
+    min-width: 240px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    text-align: center;
+  }
+
+  .navbar-menu.open {
+    display: flex;
+    animation: fadeInMenu 0.3s ease;
+  }
+
+  .navbar-menu li {
+    width: 100%;
+  }
+
+  .navbar-menu li a {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    display: block;
+    text-align: center;
+  }
+
+  .navbar-menu li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .navbar-menu li a::after {
+    display: none;
+  }
+
+  /* Burger Button */
+  .navbar-burger {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+  }
+
+  .burger-line {
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    display: block;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  .burger-line.open:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .burger-line.open:nth-child(2) {
+    opacity: 0;
+  }
+  .burger-line.open:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  @keyframes fadeInMenu {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+}
+
+/* Extra Small Screens */
+@media (max-width: 480px) {
+  .navbar-menu li a {
+    font-size: 0.9rem;
+  }
+
+  .navbar-logo-img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar-company-name {
+    font-size: 1rem;
+  }
+}
+
+/* Hide burger button on desktop */
+@media (min-width: 769px) {
+  .navbar-burger {
+    display: none;
+  }
+}

@@ -1,0 +1,344 @@
+/* ============================= */
+/* TOURS PAGE BACKGROUND & STRUCTURE */
+/* ============================= */
+.tours-page {
+    min-height: 100vh;
+    padding-top: 8rem;
+    padding-bottom: 5rem;
+    background: linear-gradient(to bottom right, #d8c49c, #e5d1a1, #d1b97e); /* warm khaki tones */
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    overflow-x: hidden;
+  }
+  /* ============================= */
+/* CATEGORY FLEX WRAPPER */
+/* ============================= */
+.flex-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 0 1rem;
+    margin-top: 1rem;
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Category cards */
+
+.category-card {
+  /* Two-up layout: take roughly half the row but allow breathing room */
+  flex: 0 1 calc(48% - 1rem);
+  min-width: 480px; /* increased so cards feel larger */
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: 16px;
+  text-align: center;
+  padding: 0;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.09);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16/9; /* slightly taller — better for video */
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+/* Last card centering when odd number of items */
+.category-card:last-child:nth-child(odd) {
+    margin-right: auto;
+    margin-left: auto;
+}
+  
+  .category-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  .category-card .text-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.98);
+    padding: 1.25rem 1.25rem;
+    z-index: 6; /* ensure text is above video overlay */
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.08);
+    transition: transform 0.28s ease;
+  }
+
+  /* Category Video Styles (consolidated) */
+  .category-video-wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000; /* fallback while video loads */
+  }
+
+  .category-video-wrapper .vimeo-embed-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    inset: 0;
+    overflow: hidden;
+    margin: 0 !important;
+  }
+
+  .category-video-wrapper .vimeo-embed-wrapper iframe {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 150% !important; /* intentionally larger to avoid gaps */
+    height: 150% !important;
+    border: none !important;
+    transform: translate(-50%, -50%) scale(1.02);
+    transition: transform 0.45s ease;
+    object-fit: cover;
+  }
+
+  .category-card:hover .category-video-wrapper .vimeo-embed-wrapper iframe {
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+  
+  .page-subtext span {
+    font-weight: 700;
+    color: #003366;
+  }
+  
+  /* Responsive scaling */
+  @media (max-width: 1024px) {
+    .page-heading {
+      font-size: 3rem;
+    }
+    .page-subtext {
+      font-size: 1.2rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .page-heading {
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+    }
+    .page-subtext {
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .category-card {
+      max-width: 98%;
+      border-radius: 10px;
+    }
+
+    .category-card h2 {
+      font-size: 1.7rem;
+    }
+
+    .category-card p {
+      font-size: 1rem;
+    }
+
+    /* ensure iframe covers fully on small phones */
+    .category-video-wrapper .vimeo-embed-wrapper iframe {
+      width: 180% !important;
+      height: 180% !important;
+      transform: translate(-50%, -50%) scale(1.0) !important;
+    }
+  }
+  
+  
+  /* Decorative divider under main title */
+  .gold-divider {
+    width: 80px;
+    height: 4px;
+    background-color: #f5deb3;
+    margin: 1rem auto 2rem auto;
+    border-radius: 2px;
+  }
+  
+  /* NOTE: legacy duplicated category block removed — styles are consolidated above for consistent sizing */
+  
+  /* ============================= */
+  /* FLEX WRAPPER FOR TOUR CARDS */
+  /* ============================= */
+  .tour-flex-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;       /* Center the cards */
+    align-items: stretch;          /* Make all cards equal height */
+    gap: 2rem;                     /* Spacing between cards */
+    padding: 0 2rem;
+    margin-top: 2rem;
+  }
+  
+  /* Each card (the motion.div container) */
+  .tour-flex-wrapper > div {
+    flex: 1 1 45%;                 /* 2 per row on medium screens */
+    max-width: 45%;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .tour-flex-wrapper > div:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* TOUR CARD INNER STYLING */
+  .tour-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+  
+  .tour-info {
+    padding: 1.5rem;
+  }
+  
+  .tour-info h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #003366;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tour-info p {
+    color: #444;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+  
+  .details-link {
+    color: #003366;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+  }
+  
+  .details-link:hover {
+    color: #f5deb3;
+  }
+  
+  /* ============================= */
+  /* BACK BUTTON */
+  /* ============================= */
+/* ============================= */
+/* BACK BUTTON STYLING */
+/* ============================= */
+
+.back-btn {
+    display: inline-block;
+    background: #003366;
+    color: #f5deb3;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    margin-bottom: 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .back-btn:hover {
+    background: #f5deb3;
+    color: #003366;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Centered alignment for both top and bottom buttons */
+  .back-btn.centered {
+    display: block;
+    margin: 0 auto 2rem auto;
+  }
+  
+  /* Wrapper to add spacing for bottom button */
+  .bottom-back-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid rgba(0, 51, 102, 0.1);
+  }
+  
+  /* ============================= */
+  /* RESPONSIVE BEHAVIOR */
+  /* ============================= */
+  @media (max-width: 1200px) {
+    .tour-flex-wrapper > div {
+      flex: 1 1 48%;               /* still 2 per row but adjusts spacing */
+      max-width: 48%;
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .tour-flex-wrapper > div {
+      flex: 1 1 100%;              /* single column on small screens */
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .category-card {
+      flex: 1 1 100%;
+      max-width: 98%; /* make cards larger on mobile */
+      border-radius: 12px;
+      aspect-ratio: 16/9;
+    }
+
+    .category-card .text-content {
+      background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.35));
+      color: #fff;
+      backdrop-filter: blur(2px);
+    }
+
+    .category-card h2 {
+      color: #ffffff;
+      font-size: 1.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .category-card p {
+      color: #f5deb3;
+      font-size: 1.05rem;
+    }
+
+    .tour-info h3 {
+      font-size: 1.15rem;
+    }
+  }
+  
+  /* ============================= */
+  /* SUBTLE BACKGROUND TEXTURE (OPTIONAL) */
+  /* ============================= */
+  .tours-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+  }
+  
+  .container {
+    position: relative;
+    z-index: 1;
+  }
+  
