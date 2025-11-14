@@ -357,9 +357,9 @@ const Contact = () => {
             <div className="social-links">
               <h4>Follow Us</h4>
               <div className="social-icons">
-                <a href="#facebook" className="social-link">Facebook</a>
+                <a href="https://www.facebook.com/admtravels.sa" className="social-link">Facebook</a>
                 <a href="https://www.instagram.com/adm__travels" className="social-link">Instagram</a>
-                <a href="#tiktok" className="social-link">TikTok</a>
+                <a href="https://www.tiktok.com/@adm.travels" className="social-link">TikTok</a>
               </div>
             </div>
           </div>

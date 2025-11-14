@@ -97,6 +97,28 @@
   font-size: 0.9rem;
 }
 
+.footer-bottom p {
+  margin: 0.5rem 0;
+}
+
+.footer-credit {
+  font-size: 0.85rem;
+  color: #aaaaaa;
+  margin-top: 0.75rem;
+}
+
+.footer-credit-link {
+  color: #f5deb3;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.footer-credit-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 /* === Responsive Tweaks === */
 @media (max-width: 768px) {
   .footer-container {

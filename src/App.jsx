@@ -10,6 +10,8 @@ const Home = React.lazy(() => import('./components/Home'));
 const Tours = React.lazy(() => import('./components/Tours'));
 const About = React.lazy(() => import('./components/About'));
 const Contact = React.lazy(() => import('./components/Contact'));
+const Terms = React.lazy(() => import('./components/Terms'));
+const Privacy = React.lazy(() => import('./components/Privacy'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -42,6 +44,8 @@ const App = () => {
             <Route path="/tours" element={<Tours />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
         </Suspense>
         

@@ -16,18 +16,38 @@ const About = () => {
         </p>
 
         {/* ============================= */}
-        {/* ABOUT INTRO TEXT */}
+        {/* ABOUT INTRO TEXT WITH VIDEO BACKGROUND */}
         {/* ============================= */}
-        <div className="about-text">
-          <p className="about-paragraph">
-            Welcome to <strong>ADM Travels</strong> — your Cape Town travel specialist dedicated to crafting
-            breathtaking, personalized adventures. From scenic drives to Table Mountain’s peak to tranquil
-            wine tours and cultural journeys, we bring South Africa’s Mother City to life.
-          </p>
-          <p className="about-paragraph">
-            With deep local knowledge and years of experience, our mission is to turn your travels into
-            lasting memories, built on authenticity, passion, and the spirit of discovery.
-          </p>
+        <div className="about-text-video-wrapper">
+          {/* Background Video */}
+          <video 
+            className="about-background-video" 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+          >
+            {/* Placeholder: Replace with your video at /videos/about-bg.mp4 */}
+            <source src="/paraGlide.mp4" type="video/mp4" />
+            {/* When you add your video, change to: <source src="/videos/about-bg.mp4" type="video/mp4" /> */}
+            Your browser does not support the video tag.
+          </video>
+          
+          {/* Overlay for better text readability */}
+          <div className="about-video-overlay"></div>
+          
+          {/* Text Content */}
+          <div className="about-text">
+            <p className="about-paragraph">
+              Welcome to <strong>ADM Travels</strong> — your Cape Town travel specialist dedicated to crafting
+              breathtaking, personalized adventures. From scenic drives to Table Mountain's peak to tranquil
+              wine tours and cultural journeys, we bring South Africa's Mother City to life.
+            </p>
+            <p className="about-paragraph">
+              With deep local knowledge and years of experience, our mission is to turn your travels into
+              lasting memories, built on authenticity, passion, and the spirit of discovery.
+            </p>
+          </div>
         </div>
 
         {/* ============================= */}

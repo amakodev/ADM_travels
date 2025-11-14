@@ -26,6 +26,15 @@ const Footer = () => {
           </ul>
         </div>
 
+        {/* === Legal Links === */}
+        <div className="footer-links">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/terms">Terms & Conditions</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+
         {/* === Contact Info === */}
         <div className="footer-contact">
           <h4>Get in Touch</h4>
@@ -38,6 +47,17 @@ const Footer = () => {
       {/* === Bottom Copyright === */}
       <div className="footer-bottom">
         <p>© {currentYear} ADM Travels. All rights reserved.</p>
+        <p className="footer-credit">
+          Website designed by{' '}
+          <a 
+            href="https://robq.online" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="footer-credit-link"
+          >
+            RobQTech Web
+          </a>
+        </p>
       </div>
     </footer>
   );

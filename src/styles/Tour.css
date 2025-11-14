@@ -296,11 +296,20 @@
   }
   
   @media (max-width: 768px) {
+    .flex-wrapper {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 0 0.5rem;
+    }
+
     .category-card {
       flex: 1 1 100%;
-      max-width: 98%; /* make cards larger on mobile */
+      min-width: 100%;
+      max-width: 100%;
       border-radius: 12px;
       aspect-ratio: 16/9;
+      margin-bottom: 0;
     }
 
     .category-card .text-content {
@@ -322,6 +331,17 @@
 
     .tour-info h3 {
       font-size: 1.15rem;
+    }
+
+    .tour-flex-wrapper {
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 0 0.5rem;
+    }
+
+    .tour-flex-wrapper > div {
+      flex: 1 1 100%;
+      max-width: 100%;
     }
   }
   

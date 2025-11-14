@@ -4,6 +4,7 @@
   font-family: 'Poppins', sans-serif;
   color: #003366;
   text-align: center;
+  overflow-x: hidden;
 }
 
 .about-heading {
@@ -29,16 +30,69 @@
   color: #002a55;
 }
 
+/* ============================= */
+/* ABOUT TEXT WITH VIDEO BACKGROUND */
+/* ============================= */
+.about-text-video-wrapper {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: 0;
+  margin-bottom: 3rem;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.about-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 51, 102, 0.75),
+    rgba(0, 51, 102, 0.65)
+  );
+  z-index: 2;
+}
+
 .about-text {
+  position: relative;
+  z-index: 3;
   max-width: 900px;
-  margin: 0 auto 3rem auto;
+  padding: 3rem 2.5rem;
   line-height: 1.8;
-  color: #002a55;
+  color: #ffffff;
+  text-align: center;
 }
 
 .about-paragraph {
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.about-paragraph strong {
+  color: #f5deb3;
+  font-weight: 700;
 }
 
 /* ============================= */
@@ -67,11 +121,10 @@
 /* REVIEWS SECTION */
 /* ============================= */
 .reviews-section {
-  background: #ffffff;
+  background: transparent;
   padding: 4rem 2rem;
   margin-top: 5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .reviews-heading {
@@ -235,6 +288,12 @@
   .about-hero-image {
     height: 380px;
   }
+  .about-text-video-wrapper {
+    min-height: 350px;
+  }
+  .about-text {
+    padding: 2.5rem 2rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -243,6 +302,22 @@
   }
   .about-subheading {
     font-size: 1.2rem;
+  }
+  .about-text-video-wrapper {
+    min-height: 300px;
+    border-radius: 0;
+  }
+  .about-text {
+    padding: 2rem 1.5rem;
+  }
+  .about-paragraph {
+    font-size: 1rem;
+  }
+  .reviews-section {
+    background: transparent;
+    padding: 3rem 0;
+    margin-top: 3rem;
+    border-radius: 0;
   }
   .review-button {
     font-size: 0.95rem;

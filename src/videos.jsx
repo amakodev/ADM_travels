@@ -1,4 +1,5 @@
 import React from "react";
+import LazyVideo from "./components/LazyVideo";
 
 // Vimeo video IDs - replace with your actual video IDs
 const videoIds = {
@@ -9,45 +10,33 @@ const videoIds = {
   adventure: "1134305225",
 };
 
-// Helper function to create Vimeo embed
-const createVimeoEmbed = (videoId, title) => (
-  <div 
-    className="vimeo-embed-wrapper"
-    style={{ 
-      padding: "56.25% 0 0 0", 
-      position: "relative", 
-      width: "100%", 
-      height: 0,
-      overflow: "hidden"
-    }}
-  >
-    <iframe
-      title={title}
-      src={`https://player.vimeo.com/video/${videoId}?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&background=1&controls=0`}
-      frameBorder="0"
-      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-      referrerPolicy="strict-origin-when-cross-origin"
-      style={{ 
-        position: "absolute", 
-        top: 0, 
-        left: 0, 
-        width: "100%", 
-        height: "100%",
-        border: "none",
-        borderRadius: "12px",
-        objectFit: "cover"
-      }}
-      allowFullScreen
-    ></iframe>
-  </div>
+// Optional poster images for each category (you can add these later)
+const posterImages = {
+  tasting: null, // Add poster image URL if available
+  culture: null,
+  city: null,
+  nature: null,
+  adventure: null,
+};
+
+// Helper function to create lazy-loaded Vimeo embed
+const createLazyVimeoEmbed = (videoId, title, poster = null) => (
+  <LazyVideo
+    videoId={videoId}
+    title={title}
+    poster={poster}
+    autoplay={true}
+    loop={true}
+    muted={true}
+  />
 );
 
 const videos = {
-  tasting: createVimeoEmbed(videoIds.tasting, "Tasting"),
-  culture: createVimeoEmbed(videoIds.culture, "Culture"),
-  city: createVimeoEmbed(videoIds.city, "City"),
-  nature: createVimeoEmbed(videoIds.nature, "Nature"),
-  adventure: createVimeoEmbed(videoIds.adventure, "Adventure"),
+  tasting: createLazyVimeoEmbed(videoIds.tasting, "Tasting Tours", posterImages.tasting),
+  culture: createLazyVimeoEmbed(videoIds.culture, "Cultural Tours", posterImages.culture),
+  city: createLazyVimeoEmbed(videoIds.city, "City Tours", posterImages.city),
+  nature: createLazyVimeoEmbed(videoIds.nature, "Nature Tours", posterImages.nature),
+  adventure: createLazyVimeoEmbed(videoIds.adventure, "Adventure Tours", posterImages.adventure),
 };
 
 export default videos;

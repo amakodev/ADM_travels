@@ -201,14 +201,7 @@ export const tours = [
     images: ['/images/plane-tour.jpg'],
     price: 'Custom Price'
   },
-  {
-    id: 25,
-    name: 'Testnet',
-    description: 'See the city and the coast from the sky. Experience breathtaking aerial views of Cape Town, the Twelve Apostles, and the Atlantic coastline.',
-    category: 'adventure',
-    images: ['/images/plane-tour.jpg'],
-    price: '$0.01'
-  }
+
 ];
 
 // Category labels for display
