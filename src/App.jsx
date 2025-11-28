@@ -1,10 +1,9 @@
+import './App.css';
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Toaster } from './components/ui/toaster';
-import './App.css';
-
 // Lazy load route components for code splitting
 const Home = React.lazy(() => import('./components/Home'));
 const Tours = React.lazy(() => import('./components/Tours'));
