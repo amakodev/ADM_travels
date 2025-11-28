@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/GoogleReviewsCarousel.css';
 
-const GoogleReviewsCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [cardsPerView, setCardsPerView] = useState(3);
-
-  const reviews = [
+const reviews = [
     {
       id: 1,
       author: 'Fırathan Bakır',
@@ -55,6 +51,10 @@ const GoogleReviewsCarousel = () => {
       text: 'Excellent service and amazing tours! Highly recommended.',
     },
   ];
+
+const GoogleReviewsCarousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardsPerView, setCardsPerView] = useState(3);
 
   const nextReview = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
@@ -121,6 +121,7 @@ const GoogleReviewsCarousel = () => {
           <img
             src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
             alt="Google"
+            loading="lazy"
             className="google-logo"
           />
           <h3 className="carousel-title">Reviews</h3>

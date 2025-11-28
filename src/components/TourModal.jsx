@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -18,7 +18,10 @@ const TourModal = ({ tour, isOpen, onClose }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const paypalButtonContainerRef = useRef(null);
+  const turnstileContainerRef = useRef(null);
+  const turnstileWidgetIdRef = useRef(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,6 +31,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
   // or https://developer.paypal.com/dashboard/applications/live (production)
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   const makeWebhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL;
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
     const handleEscape = (e) => e.key === 'Escape' && onClose();
@@ -54,6 +58,11 @@ const TourModal = ({ tour, isOpen, onClose }) => {
       setGuests(1);
       setErrors({});
       setPaypalLoaded(false);
+      setTurnstileToken(null);
+      // Reset Turnstile widget
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetIdRef.current);
+      }
     }
   }, [isOpen]);
 
@@ -154,6 +163,11 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     return validationErrors;
   };
 
+  const validationErrors = useMemo(
+    () => validateForm(),
+    [formData, selectedDate, guests]
+  );
+
   // Calculate price: Extract base price and multiply by number of guests
   // Use optional chaining to handle null tour
   const basePrice = Number(tour?.price?.toString().replace(/[^0-9.]/g, '') || 0);
@@ -164,7 +178,9 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     /free/i.test(String(tour?.price || ''));
 
   // Form is valid if no errors exist
-  const isFormValid = Object.keys(validateForm()).length === 0;
+  // Turnstile token is only required if Turnstile is configured
+  const isFormValid = Object.keys(validationErrors).length === 0 && 
+                     (turnstileSiteKey ? turnstileToken !== null : true);
   
   // Format price for display (with currency symbol)
   const formatPrice = (amount) => {
@@ -217,6 +233,9 @@ const TourModal = ({ tour, isOpen, onClose }) => {
       // Additional Metadata
       booking_source: 'ADM Travels Website',
       booking_platform: 'Web',
+      
+      // Security (only include if Turnstile is configured and token exists)
+      ...(turnstileToken && { turnstile_token: turnstileToken }),
     };
 
     try {
@@ -301,6 +320,56 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     }
   }, [tour, totalPrice, guests, selectedDate, paypalClientId, sendBookingToWebhook, onClose]);
 
+  // Initialize Turnstile widget
+  useEffect(() => {
+    if (!isOpen || !tour || !turnstileSiteKey || !turnstileContainerRef.current) {
+      return;
+    }
+
+    // Wait for Turnstile to be available
+    const checkTurnstile = setInterval(() => {
+      if (window.turnstile && turnstileContainerRef.current) {
+        clearInterval(checkTurnstile);
+        
+        // Remove any existing widget
+        if (turnstileWidgetIdRef.current && window.turnstile) {
+          window.turnstile.remove(turnstileWidgetIdRef.current);
+        }
+
+        // Render Turnstile widget
+        const widgetId = window.turnstile.render(turnstileContainerRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token) => {
+            setTurnstileToken(token);
+          },
+          'error-callback': () => {
+            setTurnstileToken(null);
+            toast({
+              variant: 'destructive',
+              title: 'CAPTCHA Error',
+              description: 'There was an error loading the security verification. Please refresh the page.',
+            });
+          },
+          'expired-callback': () => {
+            setTurnstileToken(null);
+          },
+          theme: 'auto',
+          size: 'normal',
+        });
+        
+        turnstileWidgetIdRef.current = widgetId;
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(checkTurnstile);
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, [isOpen, tour, turnstileSiteKey, toast]);
+
   // Render PayPal buttons
   useEffect(() => {
     if (!isOpen || !tour || !paypalLoaded || !isFormValid || isFreeOrCustom) {
@@ -315,7 +384,8 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     paypalButtonContainerRef.current.innerHTML = '';
 
     // Only render if form is valid and tour is paid
-    if (totalPrice > 0 && window.paypal.Buttons) {
+    // Turnstile token is only required if Turnstile is configured
+    if (totalPrice > 0 && window.paypal.Buttons && (turnstileSiteKey ? turnstileToken : true)) {
       window.paypal.Buttons({
         style: {
           layout: 'vertical',
@@ -386,7 +456,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
         paypalButtonContainerRef.current.innerHTML = '';
       }
     };
-  }, [isOpen, tour, paypalLoaded, isFormValid, isFreeOrCustom, totalPrice, handlePaypalSuccess, isSubmitting]);
+  }, [isOpen, tour, paypalLoaded, isFormValid, isFreeOrCustom, totalPrice, handlePaypalSuccess, isSubmitting, turnstileToken, turnstileSiteKey]);
 
   // Early return after all hooks to maintain hook order
   if (!isOpen || !tour) return null;
@@ -421,6 +491,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'
                 }
                 alt={tour.name}
+                loading="lazy"
                 className="modal-image"
               />
             </div>
@@ -599,8 +670,12 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                   </div>
                 </div>
 
-                
-
+                {/* Cloudflare Turnstile CAPTCHA */}
+                {!isFreeOrCustom && Object.keys(validationErrors).length === 0 && turnstileSiteKey && (
+                  <div className="turnstile-container">
+                    <div ref={turnstileContainerRef} id="turnstile-widget"></div>
+                  </div>
+                )}
 
                 {/* Primary action: PayPal for paid tours, Contact for free/custom */}
                 {isFormValid && !isFreeOrCustom && (
@@ -632,7 +707,13 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                 )}
                 {!isFormValid && !isFreeOrCustom && (
                   <div className="paypal-button-placeholder">
-                    <p>Please fill in all required fields to proceed with payment.</p>
+                    <p>
+                      {Object.keys(validationErrors).length > 0 
+                        ? 'Please fill in all required fields to proceed with payment.'
+                        : turnstileSiteKey && !turnstileToken 
+                        ? 'Please complete the security verification to proceed with payment.'
+                        : 'Please complete all steps to proceed with payment.'}
+                    </p>
                   </div>
                 )}
       </div>

@@ -1,41 +1,32 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { categoryLabels, getCategories, getToursByCategory } from '../data/tours';
-import videos from '../videos';
+import React, { useState, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
+import { tours, categoryLabels } from '../data/tours';
 import '../styles/Tour.css';
 
 // Lazy load TourModal since it includes heavy dependencies (framer-motion, react-datepicker, PayPal SDK)
 const TourModal = lazy(() => import('./TourModal'));
 
-// Fallback icons if no Vimeo embed exists for a category
-const categoryFallbacks = {
-  nature: '🌿',
-  cultural: '🏛️',
-  city: '🏙️',
-  tasting: '🍷',
-  adventure: '🚁',
-};
-
-// Normalize data category keys to our Vimeo mapping keys
-const normalizeCategoryKey = (category) => {
-  if (category === 'cultural') return 'culture';
-  return category;
-};
+const filterOptions = [
+  { key: 'all', label: 'All' },
+  { key: 'nature', label: 'Nature' },
+  { key: 'cultural', label: 'Cultural' },
+  { key: 'city', label: 'City' },
+  { key: 'tasting', label: 'Tasting' },
+];
 
 const Tours = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedTour, setSelectedTour] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [videoErrors, setVideoErrors] = useState({});
-  const categories = getCategories();
 
-  useEffect(() => {
-    if (selectedCategory) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [selectedCategory]);
+  const filteredTours =
+    activeFilter === 'all'
+      ? tours
+      : tours.filter((tour) => tour.category === activeFilter);
 
-  const handleCategorySelect = (category) => setSelectedCategory(category);
+  const handleFilterChange = (filterKey) => {
+    setActiveFilter(filterKey);
+  };
   const handleTourClick = (tour) => {
     setSelectedTour(tour);
     setIsModalOpen(true);
@@ -43,10 +34,6 @@ const Tours = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedTour(null);
-  };
-  const handleBackToCategories = () => {
-    setSelectedCategory(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -72,119 +59,70 @@ const Tours = () => {
         {/* ========================= */}
         {/* CATEGORY OR TOUR SECTION */}
         {/* ========================= */}
-        <AnimatePresence mode="wait">
-          {!selectedCategory ? (
-            // =========================
-            // CATEGORY VIEW
-            // =========================
-            <motion.div
-              key="categories"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex-wrapper">
-                {categories.map((category, index) => (
-                  <motion.button
-                    key={category}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleCategorySelect(category)}
-                    className="category-card"
-                  >
-                    <div className="category-video-wrapper">
-                      {/* Prefer Vimeo embed when available; otherwise fallback to emoji */}
-                      {videos[normalizeCategoryKey(category)] ? (
-                        videos[normalizeCategoryKey(category)]
-                      ) : (
-                        <div className="category-fallback">{categoryFallbacks[category]}</div>
-                      )}
-                    </div>
-                    <div className="text-content">
-                      <h2>{categoryLabels[category]}</h2>
-                      <p>{getToursByCategory(category).length} tours available</p>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          ) : (
-            // =========================
-            // TOURS VIEW (AFTER CATEGORY SELECT)
-            // =========================
-            <motion.div
-              key={selectedCategory}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              {/* Top Back Button */}
-              <motion.button
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={handleBackToCategories}
-                className="back-btn centered"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="tour-filter-bar">
+            {filterOptions.map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => handleFilterChange(filter.key)}
+                className={
+                  filter.key === activeFilter
+                    ? 'tour-filter-button tour-filter-button--active'
+                    : 'tour-filter-button'
+                }
               >
-                ← Back to Categories
-              </motion.button>
+                {filter.label}
+              </button>
+            ))}
+          </div>
 
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
-                {categoryLabels[selectedCategory]} Tours
-              </h2>
-
-              {/* Tour Cards */}
-              <div className="tour-flex-wrapper">
-                {getToursByCategory(selectedCategory).map((tour, index) => (
-                  <motion.div
-                    key={tour.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    className="tour-card"
+          <div className="tour-grid">
+            {filteredTours.map((tour, index) => (
+              <motion.div
+                key={tour.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="tour-card"
+              >
+                <div className="tour-image">
+                  <img
+                    src={
+                      tour.images?.[0] ||
+                      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'
+                    }
+                    alt={tour.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.src =
+                        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
+                    }}
+                  />
+                </div>
+                <div className="tour-info">
+                  <span className="tour-category-tag">
+                    {categoryLabels[tour.category] || 'Other'}
+                  </span>
+                  <h3>{tour.name}</h3>
+                  <p>{tour.description}</p>
+                  <button
+                    type="button"
+                    className="tour-cta-button"
                     onClick={() => handleTourClick(tour)}
                   >
-                    <div className="tour-image">
-                      <img
-                        src={
-                          tour.images?.[0] ||
-                          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'
-                        }
-                        alt={tour.name}
-                        onError={(e) => {
-                          e.target.src =
-                            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
-                        }}
-                      />
-                    </div>
-                    <div className="tour-info">
-                      <h3>{tour.name}</h3>
-                      <p>{tour.description}</p>
-                      <span className="details-link">View Details →</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Bottom Back Button */}
-              <div className="bottom-back-btn-wrapper">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleBackToCategories}
-                  className="back-btn centered"
-                >
-                  ↑ Back to Categories
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    View Tour
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
       
 

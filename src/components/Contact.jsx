@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import '../styles/Contact.css';
 
 const Contact = () => {
@@ -13,10 +13,14 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileContainerRef = useRef(null);
+  const turnstileWidgetIdRef = useRef(null);
 
   // Get webhook URL - use contact-specific or fallback to general webhook
   const contactWebhookUrl = import.meta.env.VITE_MAKE_CONTACT_WEBHOOK_URL || 
                            import.meta.env.VITE_MAKE_WEBHOOK_URL;
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,6 +82,53 @@ const Contact = () => {
     return validationErrors;
   };
 
+  const validationErrors = useMemo(() => validateForm(), [formData]);
+
+  // Initialize Turnstile widget
+  useEffect(() => {
+    if (!turnstileSiteKey || !turnstileContainerRef.current) {
+      return;
+    }
+
+    // Wait for Turnstile to be available
+    const checkTurnstile = setInterval(() => {
+      if (window.turnstile && turnstileContainerRef.current) {
+        clearInterval(checkTurnstile);
+        
+        // Remove any existing widget
+        if (turnstileWidgetIdRef.current && window.turnstile) {
+          window.turnstile.remove(turnstileWidgetIdRef.current);
+        }
+
+        // Render Turnstile widget
+        const widgetId = window.turnstile.render(turnstileContainerRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token) => {
+            setTurnstileToken(token);
+          },
+          'error-callback': () => {
+            setTurnstileToken(null);
+          },
+          'expired-callback': () => {
+            setTurnstileToken(null);
+          },
+          theme: 'auto',
+          size: 'normal',
+        });
+        
+        turnstileWidgetIdRef.current = widgetId;
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(checkTurnstile);
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetIdRef.current);
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, [turnstileSiteKey]);
+
   // Send contact form data to Make.com webhook
   const sendContactToWebhook = async () => {
     if (!contactWebhookUrl) {
@@ -111,6 +162,9 @@ const Contact = () => {
       contact_source: 'ADM Travels Website',
       contact_platform: 'Web',
       form_type: 'Contact Form',
+      
+      // Security (only include if Turnstile is configured and token exists)
+      ...(turnstileToken && { turnstile_token: turnstileToken }),
     };
 
     try {
@@ -129,7 +183,6 @@ const Contact = () => {
       }
 
       const result = await response.json().catch(() => ({})); // Handle non-JSON responses
-      console.log('✅ Contact form data sent to Make.com successfully:', result);
       return { success: true, data: result };
     } catch (error) {
       console.error('❌ Error sending contact form data to Make.com:', error);
@@ -141,9 +194,14 @@ const Contact = () => {
     e.preventDefault();
     
     // Validate form
-    const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      return;
+    }
+
+    // Check Turnstile token only if Turnstile is configured
+    if (turnstileSiteKey && !turnstileToken) {
+      setSubmitError('Please complete the security verification before submitting.');
       return;
     }
 
@@ -155,7 +213,6 @@ const Contact = () => {
       const webhookResult = await sendContactToWebhook();
       
       if (webhookResult.success) {
-        console.log('✅ Contact form submitted successfully');
         setSubmitted(true);
         // Reset form after successful submission
         setTimeout(() => {
@@ -168,6 +225,11 @@ const Contact = () => {
             message: ''
           });
           setErrors({});
+          setTurnstileToken(null);
+          // Reset Turnstile widget
+          if (turnstileWidgetIdRef.current && window.turnstile) {
+            window.turnstile.reset(turnstileWidgetIdRef.current);
+          }
         }, 3000);
       } else {
         // Show success to user even if webhook fails (don't block submission)
@@ -183,6 +245,11 @@ const Contact = () => {
             message: ''
           });
           setErrors({});
+          setTurnstileToken(null);
+          // Reset Turnstile widget
+          if (turnstileWidgetIdRef.current && window.turnstile) {
+            window.turnstile.reset(turnstileWidgetIdRef.current);
+          }
         }, 3000);
       }
     } catch (error) {
@@ -329,13 +396,23 @@ const Contact = () => {
                   )}
                 </div>
 
+                {/* Cloudflare Turnstile CAPTCHA - Only show if configured */}
+                {turnstileSiteKey && (
+                  <div className="turnstile-container">
+                    <div ref={turnstileContainerRef} id="turnstile-widget"></div>
+                  </div>
+                )}
+
                 <button 
                   type="submit" 
                   className="submit-button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (turnstileSiteKey && !turnstileToken)}
                 >
                   {isSubmitting ? 'Sending...' : 'Send Inquiry'}
                 </button>
+                {turnstileSiteKey && !turnstileToken && Object.keys(validateForm()).length === 0 && (
+                  <p className="turnstile-hint">Please complete the security verification above to submit your inquiry.</p>
+                )}
               </form>
             )}
           </div>

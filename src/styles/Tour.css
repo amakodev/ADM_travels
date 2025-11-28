@@ -362,3 +362,106 @@
     z-index: 1;
   }
   
+  .tour-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .tour-filter-button {
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 51, 102, 0.2);
+    background-color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #003366;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tour-filter-button--active {
+    background-color: #003366;
+    color: #f5deb3;
+    border-color: #003366;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .tour-grid {
+    display: grid;
+    gap: 2rem;
+    padding: 0 0.5rem;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 480px) {
+    .tour-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .tour-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .tour-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .tour-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .tour-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .tour-category-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    margin-bottom: 0.75rem;
+    background-color: rgba(0, 51, 102, 0.06);
+    color: #003366;
+  }
+
+  .tour-cta-button {
+    margin-top: 0.75rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: 9999px;
+    background-color: #003366;
+    color: #f5deb3;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tour-cta-button:hover {
+    background-color: #f5deb3;
+    color: #003366;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .tours-page .page-subtext {
+    margin-bottom: 2.5rem;
+  }

@@ -57,6 +57,7 @@ const About = () => {
           <img
             src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600"
             alt="Cape Town coastal view"
+            loading="lazy"
             className="about-hero-image"
           />
         </div>
@@ -77,6 +78,7 @@ const About = () => {
                 <img
                   src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg"
                   alt="TripAdvisor Reviews"
+                  loading="lazy"
                   className="review-logo"
                 />
                 <div className="review-rating">

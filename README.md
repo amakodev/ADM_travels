@@ -104,6 +104,15 @@ PAYPAL_SECRET=your_sandbox_or_live_secret_key
 
 # Make.com Webhook URL (for booking notifications)
 VITE_MAKE_WEBHOOK_URL=your_make_webhook_url
+
+# Cloudflare Turnstile CAPTCHA
+# Get your site key from: https://dash.cloudflare.com/?to=/:account/turnstile
+# This is used to protect both the booking form and PayPal payment initialization
+VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key
+
+# Optional: Turnstile Secret Key (for server-side verification)
+# This should only be used in backend code if you have server-side verification
+VITE_TURNSTILE_SECRET_KEY=your_turnstile_secret_key
 ```
 
 ### 3. Switch to Live Credentials
@@ -125,3 +134,62 @@ Before deploying to production:
 - ❌ The **Secret Key** must NEVER appear in frontend code - only use it server-side
 - 🔒 Always use sandbox credentials for testing
 - 🚀 Switch to live credentials only when deploying to production
+
+## Cloudflare Turnstile CAPTCHA Setup
+
+This project uses Cloudflare Turnstile to protect both the booking form and PayPal payment initialization from spam and abuse.
+
+### 1. Get Turnstile Credentials
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/?to=/:account/turnstile)
+2. Create a new site or use an existing one
+3. Copy your **Site Key** (public, safe for frontend)
+4. Copy your **Secret Key** (private, for server-side verification only)
+
+### 2. Configure Environment Variables
+
+Add the following to your `.env` file:
+
+```env
+# Cloudflare Turnstile Site Key (Safe for frontend use)
+VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key
+
+# Optional: Turnstile Secret Key (Server-side only - NEVER expose in frontend)
+# Use this in your backend/webhook to verify tokens
+VITE_TURNSTILE_SECRET_KEY=your_turnstile_secret_key
+```
+
+### 3. How It Works
+
+- **Booking Form Protection**: The Turnstile widget appears in the booking modal after all form fields are filled. Users must complete the CAPTCHA before PayPal buttons are enabled.
+- **PayPal Payment Protection**: PayPal buttons will only render after a valid Turnstile token is obtained, preventing automated payment attempts.
+- **Contact Form Protection**: The contact form also requires Turnstile verification before submission.
+- **Token Verification**: The Turnstile token is included in webhook payloads (`turnstile_token` field) for server-side verification.
+
+### 4. Server-Side Verification (Recommended)
+
+For production, verify the Turnstile token on your server/webhook:
+
+```javascript
+// Example server-side verification
+const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    secret: process.env.VITE_TURNSTILE_SECRET_KEY,
+    response: turnstileToken, // from webhook payload
+  }),
+});
+
+const result = await response.json();
+if (!result.success) {
+  // Token verification failed - reject the request
+}
+```
+
+### Important Notes
+
+- ✅ The **Site Key** is safe to use in frontend code (it's public)
+- ❌ The **Secret Key** must NEVER appear in frontend code - only use it server-side
+- 🔒 Turnstile tokens expire after 5 minutes
+- 🚀 The widget automatically resets after form submission

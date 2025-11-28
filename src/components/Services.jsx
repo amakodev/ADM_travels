@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/Services.css';
 
-const Services = () => {
-  const services = [
+const services = [
     'Custom Tour Planning',
     'Group Bookings',
     'Airport Transfers',
@@ -15,6 +14,7 @@ const Services = () => {
     'City and Cultural Tours'
   ];
 
+const Services = () => {
   const [videoSrc, setVideoSrc] = useState('/small.mp4');
 
   useEffect(() => {

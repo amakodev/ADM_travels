@@ -202,6 +202,34 @@
   margin-top: 1rem;
 }
 
+/* Turnstile CAPTCHA Container */
+.turnstile-container {
+  width: 100%;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.turnstile-container #turnstile-widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.turnstile-error {
+  text-align: center;
+  padding: 1rem;
+  color: #d32f2f;
+  font-weight: 500;
+  background: #ffebee;
+  border-radius: 0.5rem;
+  border: 1px solid #ffcdd2;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
 /* Generic Button for Free/Custom Tours (reusing PayPal button styling) */
 .PayPalButton {
   background-color: #003366 !important;
