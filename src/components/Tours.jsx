@@ -18,6 +18,10 @@ const Tours = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedTour, setSelectedTour] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadedImageCount, setLoadedImageCount] = useState(0);
+  const [isPageReady, setIsPageReady] = useState(false);
+
+  const totalImages = tours.length;
 
   const filteredTours =
     activeFilter === 'all'
@@ -26,6 +30,15 @@ const Tours = () => {
 
   const handleFilterChange = (filterKey) => {
     setActiveFilter(filterKey);
+  };
+  const handleImageLoadedOrError = () => {
+    setLoadedImageCount((prev) => {
+      const next = prev + 1;
+      if (next >= totalImages) {
+        setIsPageReady(true);
+      }
+      return next;
+    });
   };
   const handleTourClick = (tour) => {
     setSelectedTour(tour);
@@ -38,6 +51,12 @@ const Tours = () => {
 
   return (
     <div className="tours-page">
+      {!isPageReady && (
+        <div className="tours-loading-screen">
+          <div className="tours-loading-spinner" />
+          <p className="tours-loading-text">Loading tours...</p>
+        </div>
+      )}
       <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12">
         {/* ========================= */}
         {/* HEADER SECTION */}
@@ -98,11 +117,12 @@ const Tours = () => {
                       'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'
                     }
                     alt={tour.name}
-                    loading="lazy"
                     onError={(e) => {
                       e.target.src =
                         'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
+                      handleImageLoadedOrError();
                     }}
+                    onLoad={handleImageLoadedOrError}
                   />
                 </div>
                 <div className="tour-info">
