@@ -46,9 +46,10 @@ const Terms = () => {
 
             <h3>3.2 Payment Methods</h3>
             <p>
-              We accept payments through PayPal, which provides secure payment processing. By using PayPal, 
-              you agree to PayPal's Terms of Service. We do not store your full payment card details on our 
-              servers. All payment information is processed securely through PayPal's encrypted payment gateway.
+              We accept payments through a secure online payment gateway (such as Yoco). By using our online 
+              payment services, you agree to the terms and conditions of the payment provider. We do not store 
+              your full payment card details on our servers. All payment information is processed securely 
+              through the provider's encrypted payment gateway.
             </p>
 
             <h3>3.3 Pricing</h3>
@@ -78,8 +79,8 @@ const Terms = () => {
 
             <h3>4.3 Refund Processing</h3>
             <p>
-              Refunds will be processed through the original payment method (PayPal) within 5-10 business 
-              days after approval.
+              Refunds will be processed through the original payment method used at checkout within 5-10 business 
+              days after approval, subject to the policies of the payment provider.
             </p>
           </section>
 

@@ -5,7 +5,7 @@
     min-height: 100vh;
     padding-top: 8rem;
     padding-bottom: 5rem;
-    background: linear-gradient(to bottom right, #d8c49c, #e5d1a1, #d1b97e); /* warm khaki tones */
+    background: #d8c49c; /* warm khaki tones */
     font-family: 'Poppins', sans-serif;
     position: relative;
     overflow-x: hidden;
@@ -352,7 +352,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-image: none;
     background-size: 40px 40px;
     z-index: 0;
   }
@@ -368,13 +368,14 @@
     justify-content: center;
     gap: 0.75rem;
     margin-bottom: 2rem;
-    position: sticky;
+    position: static;
     top: 5.5rem; /* keep below navbar while staying high on the page */
     z-index: 10;
     padding: 0.75rem 0.5rem;
-    background: rgba(245, 239, 224, 0.95);
-    backdrop-filter: blur(6px);
+    background: rgba(245, 239, 224, 0.98);
     border-radius: 9999px;
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .tour-filter-button {

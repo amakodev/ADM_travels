@@ -39,7 +39,7 @@ const Privacy = () => {
               <li>Email address</li>
               <li>Phone number</li>
               <li>Postal address</li>
-              <li>Payment information (processed securely through PayPal)</li>
+              <li>Payment information (processed securely through our payment provider, such as Yoco)</li>
               <li>Tour preferences and special requirements</li>
               <li>Travel dates and itinerary details</li>
             </ul>
@@ -62,7 +62,7 @@ const Privacy = () => {
             <ul>
               <li><strong>Service Delivery:</strong> To process bookings, manage tours, and provide customer support</li>
               <li><strong>Communication:</strong> To send booking confirmations, updates, and respond to inquiries</li>
-              <li><strong>Payment Processing:</strong> To process payments securely through PayPal</li>
+              <li><strong>Payment Processing:</strong> To process payments securely through our trusted payment provider</li>
               <li><strong>Improvement:</strong> To analyze website usage and improve our services</li>
               <li><strong>Marketing:</strong> To send promotional materials (with your consent) about tours and special offers</li>
               <li><strong>Legal Compliance:</strong> To comply with legal obligations and protect our rights</li>
@@ -71,22 +71,21 @@ const Privacy = () => {
           </section>
 
           <section className="privacy-section-item">
-            <h2>4. Payment Information and PayPal</h2>
-            <h3>4.1 PayPal Processing</h3>
+            <h2>4. Payment Information and Online Payments</h2>
+            <h3>4.1 Payment Processing</h3>
             <p>
-              We use PayPal as our secure payment processor. When you make a payment:
+              We use trusted third-party payment processors (such as Yoco) to handle online payments. When you make a payment:
             </p>
             <ul>
-              <li>Your payment information is processed directly by PayPal, not stored on our servers</li>
+              <li>Your payment information is processed directly by our payment provider, not stored on our servers</li>
               <li>We only receive confirmation of payment and basic transaction details</li>
-              <li>PayPal handles all sensitive financial data according to their own Privacy Policy and security standards</li>
-              <li>We do not have access to your full credit card numbers or PayPal account passwords</li>
+              <li>The payment provider handles all sensitive financial data according to their own Privacy Policy and security standards</li>
+              <li>We do not have access to your full card numbers or payment account passwords</li>
             </ul>
-
-            <h3>4.2 PayPal's Privacy Policy</h3>
+            <h3>4.2 Third-Party Payment Provider Policies</h3>
             <p>
-              By using PayPal, you also agree to PayPal's Privacy Policy. We encourage you to review 
-              PayPal's privacy practices at <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full" target="_blank" rel="noopener noreferrer">paypal.com/privacy</a>.
+              By using our online payment services, you also agree to the privacy and security policies of our payment providers
+              (for example, Yoco). We encourage you to review their privacy practices on their official websites.
             </p>
           </section>
 
@@ -97,7 +96,7 @@ const Privacy = () => {
             <h3>5.1 Service Providers</h3>
             <p>We may share information with trusted third-party service providers who assist us in:</p>
             <ul>
-              <li>Payment processing (PayPal)</li>
+              <li>Payment processing (for example, Yoco)</li>
               <li>Email delivery services</li>
               <li>Website hosting and analytics</li>
               <li>Tour operators and guides (only necessary information for tour delivery)</li>
@@ -121,7 +120,7 @@ const Privacy = () => {
             <p>Our security measures include:</p>
             <ul>
               <li>SSL encryption for data transmission</li>
-              <li>Secure payment processing through PayPal</li>
+              <li>Secure payment processing through reputable payment providers</li>
               <li>Regular security assessments</li>
               <li>Limited access to personal information on a need-to-know basis</li>
             </ul>

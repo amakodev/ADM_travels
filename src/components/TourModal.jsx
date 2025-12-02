@@ -5,6 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import '../styles/TourModal.css';
+import handlePayment from '../../yoco';
 
 const TourModal = ({ tour, isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -17,19 +18,14 @@ const TourModal = ({ tour, isOpen, onClose }) => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState(null);
-  const paypalButtonContainerRef = useRef(null);
   const turnstileContainerRef = useRef(null);
   const turnstileWidgetIdRef = useRef(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // PayPal Configuration
-  // TODO: Switch to live credentials before deployment
-  // Get credentials from: https://developer.paypal.com/dashboard/applications/sandbox (testing)
-  // or https://developer.paypal.com/dashboard/applications/live (production)
-  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  // Payment / integrations configuration
+  const yocoCheckoutEndpoint = import.meta.env.VITE_YOCO_CHECKOUT_ENDPOINT;
   const makeWebhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL;
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -57,7 +53,6 @@ const TourModal = ({ tour, isOpen, onClose }) => {
       setSelectedDate(null);
       setGuests(1);
       setErrors({});
-      setPaypalLoaded(false);
       setTurnstileToken(null);
       // Reset Turnstile widget
       if (turnstileWidgetIdRef.current && window.turnstile) {
@@ -66,55 +61,8 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  // Load PayPal SDK dynamically
-  useEffect(() => {
-    if (!paypalClientId) {
-      console.error('❌ PayPal Client ID not configured. Please add VITE_PAYPAL_CLIENT_ID to your .env file.');
-      return;
-    }
-
-    // Remove any existing PayPal SDK scripts to ensure fresh load with correct currency
-    const existingScripts = document.querySelectorAll('script[src*="paypal.com/sdk/js"]');
-    existingScripts.forEach((existingScript) => {
-      // Only remove if it has the old currency (ZAR) or if we need to reload
-      if (existingScript.src.includes('currency=ZAR') || existingScript.src.includes('currency=zar')) {
-        existingScript.remove();
-        // Clear PayPal from window if it exists
-        if (window.paypal) {
-          delete window.paypal;
-        }
-      }
-    });
-
-    // Check if PayPal SDK is already loaded with correct currency
-    if (window.paypal) {
-      setPaypalLoaded(true);
-      return;
-    }
-
-    // Load PayPal SDK script with USD currency
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture`;
-    script.async = true;
-    // Add data attribute to identify this script
-    script.setAttribute('data-currency', 'USD');
-    script.onload = () => {
-      setPaypalLoaded(true);
-    };
-    script.onerror = () => {
-      console.error('❌ Failed to load PayPal SDK');
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup: remove script if component unmounts
-      const existingScript = document.querySelector(`script[src*="paypal.com/sdk/js"]`);
-      if (existingScript && existingScript.parentNode) {
-        // Don't remove if other components might be using it
-        // existingScript.parentNode.removeChild(existingScript);
-      }
-    };
-  }, [paypalClientId]);
+  // Note: Yoco Checkout API must be called from a secure backend using your secret key.
+  // The frontend calls a backend endpoint defined by VITE_YOCO_CHECKOUT_ENDPOINT.
 
   // Validation function that returns error object
   const validateForm = () => {
@@ -179,8 +127,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
 
   // Form is valid if no errors exist
   // Turnstile token is only required if Turnstile is configured
-  const isFormValid = Object.keys(validationErrors).length === 0 && 
-                     (turnstileSiteKey ? turnstileToken !== null : true);
+  const isFormValid = Object.keys(validationErrors).length === 0;
   
   // Format price for display (with currency symbol)
   const formatPrice = (amount) => {
@@ -198,7 +145,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
       // Payment Information
       payment_reference: paymentReference,
       payment_status: 'successful',
-      payment_currency: 'USD',
+      payment_currency: 'ZAR',
       payment_amount: totalPrice,
       payment_amount_cents: Math.round(totalPrice * 100),
       
@@ -261,64 +208,41 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     }
   }, [makeWebhookUrl, totalPrice, formData, tour, basePrice, selectedDate, guests]);
 
-  // Handle PayPal payment success
-  const handlePaypalSuccess = useCallback(async (orderId, payerDetails) => {
-    setIsSubmitting(true);
-    
-    try {
-      // Extract payer's first name
-      const payerFirstName = payerDetails?.name?.given_name || payerDetails?.payer?.name?.given_name || 'Valued Customer';
-      
-      // Show payment success message with professional styling
-      const tourName = tour?.name || 'your tour';
-      const successTitle = '🎉 Payment Confirmed!';
-      const successDescription = `Thank you, ${payerFirstName}! Your booking for "${tourName}" has been successfully processed.`;
-      
-      // Send booking details to Make.com webhook
-      const webhookResult = await sendBookingToWebhook(orderId);
-      
-      if (!webhookResult.success) {
-        console.warn('⚠️ Booking saved but webhook failed:', webhookResult.error);
-        // Don't block the user - payment was successful
-        toast({
-          variant: 'success',
-          title: successTitle,
-          description: successDescription,
-        });
-        toast({
-          variant: 'warning',
-          title: 'Booking Confirmation',
-          description: 'Your payment was processed successfully. We\'re saving your booking details and will send you a confirmation email shortly.',
-        });
-      } else {
-        toast({
-          variant: 'success',
-          title: successTitle,
-          description: successDescription,
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error processing booking:', error);
-      // Don't block the user - payment was successful
-      const tourName = tour?.name || 'your tour';
+  // Start Yoco Checkout by calling a secure backend endpoint
+  const handleYocoCheckout = useCallback(async () => {
+    if (!isFormValid || isFreeOrCustom) return;
+
+    if (!yocoCheckoutEndpoint) {
       toast({
-        variant: 'success',
-        title: '🎉 Payment Confirmed!',
-        description: `Your payment for "${tourName}" was processed successfully. Your booking is confirmed!`,
+        variant: 'destructive',
+        title: 'Payment Error',
+        description: 'Yoco payment is not configured. Please contact support.',
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const data = await handlePayment(totalPrice);
+
+      if (!data || !data.redirectUrl) {
+        throw new Error('Missing redirectUrl from payment service.');
+      }
+
+      // Redirect browser to hosted Yoco checkout page
+      window.location.href = data.redirectUrl;
+    } catch (error) {
+      console.error('❌ Error creating Yoco checkout:', error);
       toast({
-        variant: 'info',
-        title: 'Next Steps',
-        description: 'We\'re processing your booking details. You\'ll receive a confirmation email shortly. If you have any questions, please contact our support team.',
+        variant: 'destructive',
+        title: 'Payment Error',
+        description: 'There was an error starting your secure payment. Please try again or contact support.',
       });
     } finally {
       setIsSubmitting(false);
-      // Close modal after a delay to allow user to see success toast notification
-      setTimeout(() => {
-        onClose();
-      }, 3000);
     }
-  }, [tour, totalPrice, guests, selectedDate, paypalClientId, sendBookingToWebhook, onClose]);
+  }, [isFormValid, isFreeOrCustom, yocoCheckoutEndpoint, totalPrice, tour, guests, formData, toast]);
 
   // Initialize Turnstile widget
   useEffect(() => {
@@ -370,93 +294,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     };
   }, [isOpen, tour, turnstileSiteKey, toast]);
 
-  // Render PayPal buttons
-  useEffect(() => {
-    if (!isOpen || !tour || !paypalLoaded || !isFormValid || isFreeOrCustom) {
-      return;
-    }
-
-    if (!paypalButtonContainerRef.current || !window.paypal) {
-      return;
-    }
-
-    // Clear previous buttons
-    paypalButtonContainerRef.current.innerHTML = '';
-
-    // Only render if form is valid and tour is paid
-    // Turnstile token is only required if Turnstile is configured
-    if (totalPrice > 0 && window.paypal.Buttons && (turnstileSiteKey ? turnstileToken : true)) {
-      window.paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'paypal',
-        },
-        createOrder: (data, actions) => {
-          // Create order with dynamic tour pricing
-          return actions.order.create({
-            purchase_units: [{
-              description: `${tour?.name || 'Tour'} - ${tour?.category || 'Travel'}`,
-              amount: {
-                value: totalPrice.toFixed(2),
-                currency_code: 'USD',
-              },
-            }],
-            application_context: {
-              brand_name: 'ADM Travels',
-              landing_page: 'BILLING',
-              user_action: 'PAY_NOW',
-            },
-          });
-        },
-        onApprove: async (data, actions) => {
-          try {
-            // Capture the payment - returns the order details
-            const order = await actions.order.capture();
-            
-            // Extract payer details from the captured order
-            const payerDetails = order.payer || {};
-            const orderId = order.id || data.orderID;
-            
-            // Handle successful payment
-            await handlePaypalSuccess(orderId, payerDetails);
-          } catch (error) {
-            console.error('❌ Error capturing PayPal payment:', error);
-            toast({
-              variant: 'destructive',
-              title: 'Payment Error',
-              description: 'There was an error processing your payment. Please try again or contact support.',
-            });
-          }
-        },
-        onCancel: () => {
-          if (!isSubmitting) {
-            toast({
-              variant: 'info',
-              title: 'Payment Cancelled',
-              description: 'You cancelled the payment. You can try again when ready.',
-            });
-          }
-        },
-        onError: (err) => {
-          console.error('❌ PayPal error:', err);
-          toast({
-            variant: 'destructive',
-            title: 'PayPal Error',
-            description: 'An error occurred with PayPal. Please try again or contact support.',
-          });
-        },
-      }).render(paypalButtonContainerRef.current);
-    }
-
-    // Cleanup function
-    return () => {
-      if (paypalButtonContainerRef.current) {
-        paypalButtonContainerRef.current.innerHTML = '';
-      }
-    };
-  }, [isOpen, tour, paypalLoaded, isFormValid, isFreeOrCustom, totalPrice, handlePaypalSuccess, isSubmitting, turnstileToken, turnstileSiteKey]);
+  // All payment UI is now driven by the Yoco checkout button below.
 
   // Early return after all hooks to maintain hook order
   if (!isOpen || !tour) return null;
@@ -671,32 +509,27 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                 </div>
 
                 {/* Cloudflare Turnstile CAPTCHA */}
-                {!isFreeOrCustom && Object.keys(validationErrors).length === 0 && turnstileSiteKey && (
+                {false && !isFreeOrCustom && turnstileSiteKey && (
                   <div className="turnstile-container">
                     <div ref={turnstileContainerRef} id="turnstile-widget"></div>
                   </div>
                 )}
 
-                {/* Primary action: PayPal for paid tours, Contact for free/custom */}
+                {/* Primary action: Yoco checkout for paid tours, Contact for free/custom */}
                 {isFormValid && !isFreeOrCustom && (
-                  <div className="paypal-button-container">
-                    {!paypalLoaded && (
-                      <div className="paypal-loading">
-                        <p>Loading secure payment...</p>
-                      </div>
-                    )}
-                    {!paypalClientId && (
-                      <div className="paypal-error">
-                        <p>⚠️ PayPal is not configured. Please contact support.</p>
-                      </div>
-                    )}
-                    <div ref={paypalButtonContainerRef} id="paypal-button-container"></div>
-                  </div>
+                  <button
+                    type="button"
+                    className="payment-button"
+                    onClick={handleYocoCheckout}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Starting secure payment...' : 'Pay Securely Online'}
+                  </button>
                 )}
                 {isFormValid && isFreeOrCustom && (
                   <button
                     type="button"
-                    className="PayPalButton"
+                    className="payment-button"
                     onClick={() => {
                       onClose();
                       navigate('/contact');
@@ -706,12 +539,10 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                   </button>
                 )}
                 {!isFormValid && !isFreeOrCustom && (
-                  <div className="paypal-button-placeholder">
+                  <div className="payment-helper">
                     <p>
                       {Object.keys(validationErrors).length > 0 
                         ? 'Please fill in all required fields to proceed with payment.'
-                        : turnstileSiteKey && !turnstileToken 
-                        ? 'Please complete the security verification to proceed with payment.'
                         : 'Please complete all steps to proceed with payment.'}
                     </p>
                   </div>

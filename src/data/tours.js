@@ -203,7 +203,7 @@ export const tours = [
   },
   {
     id: 25,
-    name: 'Testing Paypal Payment Method',
+    name: 'Testing Payment Method',
     description: 'See the city and the coast from the sky. Experience breathtaking aerial views of Cape Town, the Twelve Apostles, and the Atlantic coastline.',
     category: 'adventure',
     images: ['/images/plane-tour.jpg'],

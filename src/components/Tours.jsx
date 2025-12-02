@@ -1,9 +1,9 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { tours, categoryLabels } from '../data/tours';
 import '../styles/Tour.css';
 
-// Lazy load TourModal since it includes heavy dependencies (framer-motion, react-datepicker, PayPal SDK)
+// Lazy load TourModal since it includes heavy dependencies (framer-motion, react-datepicker, payment integrations)
 const TourModal = lazy(() => import('./TourModal'));
 
 const filterOptions = [
@@ -20,6 +20,17 @@ const Tours = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadedImageCount, setLoadedImageCount] = useState(0);
   const [isPageReady, setIsPageReady] = useState(false);
+
+  useEffect(() => {
+    if (!isPageReady) {
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = previousOverflow;
+      };
+    }
+  }, [isPageReady]);
 
   const totalImages = tours.length;
 
