@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import '../styles/Contact.css';
 
 const Contact = () => {
@@ -13,14 +13,6 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const turnstileContainerRef = useRef(null);
-  const turnstileWidgetIdRef = useRef(null);
-
-  // Get webhook URL - use contact-specific or fallback to general webhook
-  const contactWebhookUrl = import.meta.env.VITE_MAKE_CONTACT_WEBHOOK_URL || 
-                           import.meta.env.VITE_MAKE_WEBHOOK_URL;
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,112 +76,6 @@ const Contact = () => {
 
   const validationErrors = useMemo(() => validateForm(), [formData]);
 
-  // Initialize Turnstile widget
-  useEffect(() => {
-    if (!turnstileSiteKey || !turnstileContainerRef.current) {
-      return;
-    }
-
-    // Wait for Turnstile to be available
-    const checkTurnstile = setInterval(() => {
-      if (window.turnstile && turnstileContainerRef.current) {
-        clearInterval(checkTurnstile);
-        
-        // Remove any existing widget
-        if (turnstileWidgetIdRef.current && window.turnstile) {
-          window.turnstile.remove(turnstileWidgetIdRef.current);
-        }
-
-        // Render Turnstile widget
-        const widgetId = window.turnstile.render(turnstileContainerRef.current, {
-          sitekey: turnstileSiteKey,
-          callback: (token) => {
-            setTurnstileToken(token);
-          },
-          'error-callback': () => {
-            setTurnstileToken(null);
-          },
-          'expired-callback': () => {
-            setTurnstileToken(null);
-          },
-          theme: 'auto',
-          size: 'normal',
-        });
-        
-        turnstileWidgetIdRef.current = widgetId;
-      }
-    }, 100);
-
-    return () => {
-      clearInterval(checkTurnstile);
-      if (turnstileWidgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(turnstileWidgetIdRef.current);
-        turnstileWidgetIdRef.current = null;
-      }
-    };
-  }, [turnstileSiteKey]);
-
-  // Send contact form data to Make.com webhook
-  const sendContactToWebhook = async () => {
-    if (!contactWebhookUrl) {
-      console.warn('⚠️ Make.com contact webhook URL not configured. Skipping webhook call.');
-      return { success: false, error: 'Webhook URL not configured' };
-    }
-
-    const contactData = {
-      // Contact Information
-      contact_name: formData.name.trim(),
-      contact_email: formData.email.trim(),
-      contact_phone: formData.phone.trim(),
-      
-      // Inquiry Details
-      inquiry_type: 'Contact Form',
-      selected_tour: formData.tour,
-      message: formData.message.trim(),
-      message_length: formData.message.trim().length,
-      
-      // Timestamps
-      inquiry_timestamp: new Date().toISOString(),
-      inquiry_timestamp_formatted: new Date().toLocaleString('en-ZA'),
-      inquiry_date: new Date().toLocaleDateString('en-ZA', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      
-      // Additional Metadata
-      contact_source: 'ADM Travels Website',
-      contact_platform: 'Web',
-      form_type: 'Contact Form',
-      
-      // Security (only include if Turnstile is configured and token exists)
-      ...(turnstileToken && { turnstile_token: turnstileToken }),
-    };
-
-    try {
-      const response = await fetch(contactWebhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(contactData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json().catch(() => ({})); // Handle non-JSON responses
-      return { success: true, data: result };
-    } catch (error) {
-      console.error('❌ Error sending contact form data to Make.com:', error);
-      return { success: false, error: error.message };
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -199,61 +85,24 @@ const Contact = () => {
       return;
     }
 
-    // Check Turnstile token only if Turnstile is configured
-    if (turnstileSiteKey && !turnstileToken) {
-      setSubmitError('Please complete the security verification before submitting.');
-      return;
-    }
-
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      // Send to Make.com webhook
-      const webhookResult = await sendContactToWebhook();
-      
-      if (webhookResult.success) {
-        setSubmitted(true);
-        // Reset form after successful submission
-        setTimeout(() => {
-          setSubmitted(false);
-          setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            tour: '',
-            message: ''
-          });
-          setErrors({});
-          setTurnstileToken(null);
-          // Reset Turnstile widget
-          if (turnstileWidgetIdRef.current && window.turnstile) {
-            window.turnstile.reset(turnstileWidgetIdRef.current);
-          }
-        }, 3000);
-      } else {
-        // Show success to user even if webhook fails (don't block submission)
-        console.warn('⚠️ Form submitted but webhook failed:', webhookResult.error);
-        setSubmitted(true);
-        setTimeout(() => {
-          setSubmitted(false);
-          setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            tour: '',
-            message: ''
-          });
-          setErrors({});
-          setTurnstileToken(null);
-          // Reset Turnstile widget
-          if (turnstileWidgetIdRef.current && window.turnstile) {
-            window.turnstile.reset(turnstileWidgetIdRef.current);
-          }
-        }, 3000);
-      }
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          tour: '',
+          message: ''
+        });
+        setErrors({});
+      }, 3000);
     } catch (error) {
-      console.error('❌ Error submitting contact form:', error);
+      console.error('❌ Error handling contact form:', error);
       setSubmitError('There was an error submitting your message. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -396,23 +245,13 @@ const Contact = () => {
                   )}
                 </div>
 
-                {/* Cloudflare Turnstile CAPTCHA - Only show if configured */}
-                {turnstileSiteKey && (
-                  <div className="turnstile-container">
-                    <div ref={turnstileContainerRef} id="turnstile-widget"></div>
-                  </div>
-                )}
-
                 <button 
                   type="submit" 
                   className="submit-button"
-                  disabled={isSubmitting || (turnstileSiteKey && !turnstileToken)}
+                  disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Sending...' : 'Send Inquiry'}
                 </button>
-                {turnstileSiteKey && !turnstileToken && Object.keys(validateForm()).length === 0 && (
-                  <p className="turnstile-hint">Please complete the security verification above to submit your inquiry.</p>
-                )}
               </form>
             )}
           </div>

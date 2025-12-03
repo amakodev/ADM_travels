@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import '../styles/TourModal.css';
-import handlePayment from '../../yoco';
+import handlePayment from '../yoco';
 
 const TourModal = ({ tour, isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -18,16 +18,8 @@ const TourModal = ({ tour, isOpen, onClose }) => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const turnstileContainerRef = useRef(null);
-  const turnstileWidgetIdRef = useRef(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Payment / integrations configuration
-  const yocoCheckoutEndpoint = import.meta.env.VITE_YOCO_CHECKOUT_ENDPOINT;
-  const makeWebhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL;
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
     const handleEscape = (e) => e.key === 'Escape' && onClose();
@@ -53,16 +45,8 @@ const TourModal = ({ tour, isOpen, onClose }) => {
       setSelectedDate(null);
       setGuests(1);
       setErrors({});
-      setTurnstileToken(null);
-      // Reset Turnstile widget
-      if (turnstileWidgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(turnstileWidgetIdRef.current);
-      }
     }
   }, [isOpen]);
-
-  // Note: Yoco Checkout API must be called from a secure backend using your secret key.
-  // The frontend calls a backend endpoint defined by VITE_YOCO_CHECKOUT_ENDPOINT.
 
   // Validation function that returns error object
   const validateForm = () => {
@@ -126,175 +110,86 @@ const TourModal = ({ tour, isOpen, onClose }) => {
     /free/i.test(String(tour?.price || ''));
 
   // Form is valid if no errors exist
-  // Turnstile token is only required if Turnstile is configured
   const isFormValid = Object.keys(validationErrors).length === 0;
   
   // Format price for display (with currency symbol)
-  const formatPrice = (amount) => {
-    return ` $${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
-  // Send booking details to Make.com webhook
-  const sendBookingToWebhook = useCallback(async (paymentReference) => {
-    if (!makeWebhookUrl) {
-      console.warn('⚠️ Make.com webhook URL not configured. Skipping webhook call.');
-      return { success: false, error: 'Webhook URL not configured' };
-    }
-
-    const bookingData = {
-      // Payment Information
-      payment_reference: paymentReference,
-      payment_status: 'successful',
-      payment_currency: 'ZAR',
-      payment_amount: totalPrice,
-      payment_amount_cents: Math.round(totalPrice * 100),
-      
-      // Customer Information
-      customer_name: formData.name.trim(),
-      customer_email: formData.email.trim(),
-      customer_phone: `${formData.countryCode}${formData.phone.trim()}`,
-      customer_country_code: formData.countryCode,
-      
-      // Tour Information
-      tour_id: tour?.id,
-      tour_name: tour?.name,
-      tour_category: tour?.category,
-      tour_description: tour?.description,
-      tour_base_price: basePrice,
-      
-      // Booking Details
-      booking_date: selectedDate?.toISOString() || new Date().toISOString(),
-      booking_date_formatted: selectedDate?.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('en-ZA', {
+        style: 'currency',
+        currency: 'ZAR',
+        minimumFractionDigits: 2,
       }),
-      number_of_guests: guests,
-      total_price: totalPrice,
-      
-      // Timestamps
-      booking_timestamp: new Date().toISOString(),
-      booking_timestamp_formatted: new Date().toLocaleString('en-US'),
-      
-      // Additional Metadata
-      booking_source: 'ADM Travels Website',
-      booking_platform: 'Web',
-      
-      // Security (only include if Turnstile is configured and token exists)
-      ...(turnstileToken && { turnstile_token: turnstileToken }),
-    };
+    []
+  );
 
-    try {
-      const response = await fetch(makeWebhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
-      });
+  const formatPrice = useCallback(
+    (amount) => currencyFormatter.format(Number.isFinite(amount) ? amount : 0),
+    [currencyFormatter]
+  );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json().catch(() => ({})); // Handle non-JSON responses
-      return { success: true, data: result };
-    } catch (error) {
-      console.error('❌ Error sending booking data to Make.com:', error);
-      return { success: false, error: error.message };
-    }
-  }, [makeWebhookUrl, totalPrice, formData, tour, basePrice, selectedDate, guests]);
-
-  // Start Yoco Checkout by calling a secure backend endpoint
+  // Start Yoco Checkout by calling handlePayment helper
   const handleYocoCheckout = useCallback(async () => {
     if (!isFormValid || isFreeOrCustom) return;
 
-    if (!yocoCheckoutEndpoint) {
-      toast({
-        variant: 'destructive',
-        title: 'Payment Error',
-        description: 'Yoco payment is not configured. Please contact support.',
-      });
-      return;
-    }
-
     setIsSubmitting(true);
-
     try {
-      const data = await handlePayment(totalPrice);
+      const amountInCents = Math.round(totalPrice * 100);
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://admtravelssa.com';
+      const checkout = await handlePayment({
+        amount: amountInCents,
+        currency: 'ZAR',
+        cancelUrl: `${origin}/payment/cancelled`,
+        successUrl: `${origin}/payment/success`,
+        failureUrl: `${origin}/payment/failed`,
+        metadata: {
+          tourId: tour?.id,
+          tourName: tour?.name,
+          guests,
+          selectedDate: selectedDate?.toISOString?.() || null,
+          customerName: formData.name,
+          customerEmail: formData.email,
+          customerPhone: `${formData.countryCode} ${formData.phone}`.trim(),
+        },
+      });
 
-      if (!data || !data.redirectUrl) {
-        throw new Error('Missing redirectUrl from payment service.');
+      if (!checkout?.redirectUrl) {
+        throw new Error('Secure checkout link unavailable.');
       }
 
-      // Redirect browser to hosted Yoco checkout page
-      window.location.href = data.redirectUrl;
+      toast({
+        title: 'Redirecting to Yoco',
+        description: 'A secure Yoco window will open in a moment to finalize your booking.',
+      });
+
+      window.location.href = checkout.redirectUrl;
     } catch (error) {
       console.error('❌ Error creating Yoco checkout:', error);
       toast({
         variant: 'destructive',
-        title: 'Payment Error',
-        description: 'There was an error starting your secure payment. Please try again or contact support.',
+        title: 'Unable to start payment',
+        description:
+          error?.message || 'There was an error starting your secure payment. Please try again or contact support.',
       });
     } finally {
       setIsSubmitting(false);
     }
-  }, [isFormValid, isFreeOrCustom, yocoCheckoutEndpoint, totalPrice, tour, guests, formData, toast]);
+  }, [
+    formData.email,
+    formData.name,
+    formData.phone,
+    formData.countryCode,
+    guests,
+    isFormValid,
+    isFreeOrCustom,
+    selectedDate,
+    toast,
+    tour?.id,
+    tour?.name,
+    totalPrice,
+  ]);
 
-  // Initialize Turnstile widget
-  useEffect(() => {
-    if (!isOpen || !tour || !turnstileSiteKey || !turnstileContainerRef.current) {
-      return;
-    }
-
-    // Wait for Turnstile to be available
-    const checkTurnstile = setInterval(() => {
-      if (window.turnstile && turnstileContainerRef.current) {
-        clearInterval(checkTurnstile);
-        
-        // Remove any existing widget
-        if (turnstileWidgetIdRef.current && window.turnstile) {
-          window.turnstile.remove(turnstileWidgetIdRef.current);
-        }
-
-        // Render Turnstile widget
-        const widgetId = window.turnstile.render(turnstileContainerRef.current, {
-          sitekey: turnstileSiteKey,
-          callback: (token) => {
-            setTurnstileToken(token);
-          },
-          'error-callback': () => {
-            setTurnstileToken(null);
-            toast({
-              variant: 'destructive',
-              title: 'CAPTCHA Error',
-              description: 'There was an error loading the security verification. Please refresh the page.',
-            });
-          },
-          'expired-callback': () => {
-            setTurnstileToken(null);
-          },
-          theme: 'auto',
-          size: 'normal',
-        });
-        
-        turnstileWidgetIdRef.current = widgetId;
-      }
-    }, 100);
-
-    return () => {
-      clearInterval(checkTurnstile);
-      if (turnstileWidgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(turnstileWidgetIdRef.current);
-        turnstileWidgetIdRef.current = null;
-      }
-    };
-  }, [isOpen, tour, turnstileSiteKey, toast]);
-
-  // All payment UI is now driven by the Yoco checkout button below.
+  // All payment UI is driven by the Yoco checkout button below.
 
   // Early return after all hooks to maintain hook order
   if (!isOpen || !tour) return null;
@@ -346,7 +241,7 @@ const TourModal = ({ tour, isOpen, onClose }) => {
 
               {/* Booking Section */}
               <div className="booking-section visible-booking">
-                <h3>Reserve Your Spot</h3>
+                <h3>Reserve Your Experience</h3>
 
                 {/* Personal Info */}
                 <div className="booking-fields">
@@ -508,23 +403,24 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {/* Cloudflare Turnstile CAPTCHA */}
-                {false && !isFreeOrCustom && turnstileSiteKey && (
-                  <div className="turnstile-container">
-                    <div ref={turnstileContainerRef} id="turnstile-widget"></div>
-                  </div>
-                )}
-
                 {/* Primary action: Yoco checkout for paid tours, Contact for free/custom */}
                 {isFormValid && !isFreeOrCustom && (
-                  <button
-                    type="button"
-                    className="payment-button"
-                    onClick={handleYocoCheckout}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Starting secure payment...' : 'Pay Securely Online'}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="payment-button"
+                      onClick={handleYocoCheckout}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Preparing your secure checkout…' : 'Complete Secure Payment with Yoco'}
+                    </button>
+                    <div className="payment-assurance">
+                      <p>
+                        Encrypted payments are processed end-to-end by Yoco. You will receive an instant
+                        confirmation once the booking is confirmed.
+                      </p>
+                    </div>
+                  </>
                 )}
                 {isFormValid && isFreeOrCustom && (
                   <button
@@ -541,8 +437,8 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                 {!isFormValid && !isFreeOrCustom && (
                   <div className="payment-helper">
                     <p>
-                      {Object.keys(validationErrors).length > 0 
-                        ? 'Please fill in all required fields to proceed with payment.'
+                      {Object.keys(validationErrors).length > 0
+                        ? 'Please complete the highlighted details so we can prepare your secure checkout.'
                         : 'Please complete all steps to proceed with payment.'}
                     </p>
                   </div>

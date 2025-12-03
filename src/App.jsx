@@ -11,10 +11,11 @@ const About = React.lazy(() => import('./components/About'));
 const Contact = React.lazy(() => import('./components/Contact'));
 const Terms = React.lazy(() => import('./components/Terms'));
 const Privacy = React.lazy(() => import('./components/Privacy'));
+const PaymentStatus = React.lazy(() => import('./components/PaymentStatus'));
 
 // Loading fallback component
 const LoadingFallback = () => (
-  <div style={{ 
+  <div style={{
     display: 'flex', 
     justifyContent: 'center', 
     alignItems: 'center', 
@@ -45,6 +46,9 @@ const App = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/payment/success" element={<PaymentStatus type="success" />} />
+            <Route path="/payment/cancelled" element={<PaymentStatus type="cancelled" />} />
+            <Route path="/payment/failed" element={<PaymentStatus type="failed" />} />
           </Routes>
         </Suspense>
         
