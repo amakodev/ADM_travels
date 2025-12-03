@@ -7,7 +7,8 @@ export const tours = [
     description: 'Visit the most south-western tip of Africa with breathtaking views of the Atlantic and Indian Oceans. Experience dramatic cliffs, pristine beaches, and the famous lighthouse perched atop the rugged coastline.',
     category: 'nature',
     images: ['/images/capeOfGoodHope.jpg'],
-    price: '$19'
+    price: 349,
+    priceDisplay: 'R349'
   },
   {
     id: 2,
@@ -15,7 +16,8 @@ export const tours = [
     description: "See the famous African Penguins up close in their natural habitat at Simon's Town. This protected beach colony offers an unforgettable wildlife experience with thousands of penguins.",
     category: 'nature',
     images: ['/images/PenquinsBeachBoulder.jpg'],
-    price: '$9'
+    price: 169,
+    priceDisplay: 'R169'
   },
   {
     id: 3,
@@ -23,7 +25,8 @@ export const tours = [
     description: "Enjoy Cape Town's iconic colorful beach huts and surf culture. Perfect for swimming, surfing lessons, or simply relaxing on the golden sands with stunning mountain views.",
     category: 'nature',
     images: ['/images/MuizenbergBeach.jpg'],
-    price: 'Free'
+    price: 0,
+    priceDisplay: 'Free'
   },
   {
     id: 4,
@@ -31,7 +34,8 @@ export const tours = [
     description: 'Meet friendly seals at the harbor and explore local shops, galleries, and seafood restaurants. This charming fishing village offers authentic Cape Town culture.',
     category: 'nature',
     images: ['/images/KalkBaySeals.jpg'],
-    price: '$11'
+    price: 199,
+    priceDisplay: 'R199'
   },
   {
     id: 5,
@@ -39,7 +43,8 @@ export const tours = [
     description: 'Charming naval town rich in history and seaside charm. Explore historic buildings, browse local boutiques, and enjoy fresh seafood with ocean views.',
     category: 'nature',
     images: ['/images/SimonsTown.jpg'],
-    price: '$5'
+    price: 99,
+    priceDisplay: 'R99'
   },
   {
     id: 6,
@@ -47,7 +52,8 @@ export const tours = [
     description: 'Enjoy wine tasting with spectacular mountain and ocean views. Sample award-winning wines while overlooking the dramatic coastline and Table Mountain.',
     category: 'nature',
     images: ['/images/cape-vineyards.jpg'],
-    price: '$19'
+    price: 349,
+    priceDisplay: 'R349'
   },
   {
     id: 7,
@@ -55,7 +61,7 @@ export const tours = [
     description: "Take one of the world's most scenic coastal drives at golden hour. This winding road offers breathtaking vistas of the Atlantic Ocean and Hout Bay.",
     category: 'nature',
     images: ['/images/ChapmansPeak.jpg'],
-    price: '$3'
+    price: 500, // ZAR amount
   },
   {
     id: 8,
@@ -63,7 +69,8 @@ export const tours = [
     description: "Ride to the top of Cape Town's most famous landmark. Enjoy panoramic views of the city, ocean, and surrounding mountains from the summit.",
     category: 'nature',
     images: ['/images/TableMountain.jpg'],
-    price: '$22'
+    price: 399,
+    priceDisplay: 'R399'
   },
 
   // Cultural Tours
@@ -81,7 +88,8 @@ export const tours = [
     description: 'Explore colorful houses and taste Cape Malay cuisine. Learn about the rich heritage of this historic neighborhood with its unique architecture and traditions.',
     category: 'cultural',
     images: ['/images/Bookaap.jpg'],
-    price: '$16'
+    price: 219,
+    priceDisplay: 'R219'
   },
   {
     id: 11,
@@ -89,7 +97,8 @@ export const tours = [
     description: "Discover the moving history of Cape Town's apartheid era. This museum preserves the stories of the forced removals and celebrates the community spirit.",
     category: 'cultural',
     images: ['/images/District6Musem.jpg'],
-    price: '$3'
+    price: 150,
+    priceDisplay: 'R150'
   },
   {
     id: 12,
@@ -97,7 +106,8 @@ export const tours = [
     description: "Step into South Africa's oldest surviving colonial building. Explore the military museum, historical artifacts, and learn about Cape Town's colonial past.",
     category: 'cultural',
     images: ['/images/CastleOFGoodHope.jpg'],
-    price: '$10'
+    price: 189,
+    priceDisplay: 'R189'
   },
   {
     id: 13,
@@ -105,7 +115,8 @@ export const tours = [
     description: "Relax in Cape Town's historical park surrounded by museums. Stroll through beautifully manicured gardens with centuries-old trees and historical monuments.",
     category: 'cultural',
     images: ['/images/companysGarden.jpg'],
-    price: 'Free'
+    price: 0,
+    priceDisplay: 'Free'
   },
 
   // City Tours
@@ -115,7 +126,8 @@ export const tours = [
     description: 'Experience the beauty and culture of Cape Town with our guided city tours. Discover hidden gems, historical landmarks, and vibrant neighborhoods with expert local guides.',
     category: 'city',
     images: ['/images/CityCapeTown.jpg'],
-    price: 'Custom Price'
+    price: 0,
+    priceDisplay: 'Custom Price'
   },
   {
     id: 15,
@@ -123,7 +135,8 @@ export const tours = [
     description: 'Shop, dine, and enjoy entertainment by the harbor. This world-class destination offers luxury shopping, fine dining, and stunning views of Table Mountain.',
     category: 'city',
     images: ['/images/V&A Waterfront.jpg'],
-    price: 'Free (Attractions vary)'
+    price: 0,
+    priceDisplay: 'Free (Attractions vary)'
   },
   {
     id: 16,
@@ -131,7 +144,8 @@ export const tours = [
     description: 'Luxurious white-sand beaches and oceanfront restaurants. Experience the glamour of Cape Town\'s most prestigious beachfront with stunning sunsets and trendy cafes.',
     category: 'city',
     images: ['/images/CampsBayBeach&Clifton_Beaches.jpg'],
-    price: 'Free'
+    price: 0,
+    priceDisplay: 'Free'
   },
   {
     id: 17,
@@ -139,7 +153,8 @@ export const tours = [
     description: 'Boat trip to Seal Island and local markets. Enjoy a scenic harbor cruise, watch playful seals, and explore the vibrant weekend market.',
     category: 'city',
     images: ['/images/HoutBayCruise.jpg'],
-    price: '$14'
+    price: 259,
+    priceDisplay: 'R259'
   },
 
   // Tasting Tours
@@ -149,7 +164,8 @@ export const tours = [
     description: "Relax and sample Cape Town's finest local and imported teas. Learn about tea origins, brewing techniques, and enjoy paired pastries in an elegant setting.",
     category: 'tasting',
     images: ['/images/Tea-tasting.jpg'],
-    price: 'Costume'
+    price: 0,
+    priceDisplay: 'Custom Price'
   },
   {
     id: 19,
@@ -157,7 +173,8 @@ export const tours = [
     description: 'Indulge in artisanal chocolates made from African cocoa. Discover the art of chocolate making with expert chocolatiers and sample premium creations.',
     category: 'tasting',
     images: ['/images/Choco-tasting.jpg'],
-    price: '$15'
+    price: 279,
+    priceDisplay: 'R279'
   },
   {
     id: 20,
@@ -165,7 +182,8 @@ export const tours = [
     description: 'Enjoy a day in the winelands with premium tastings. Visit multiple award-winning estates, sample exceptional wines, and enjoy scenic vineyard views.',
     category: 'tasting',
     images: ['/images/wine-tasting.jpg'],
-    price: '$46'
+    price: 749,
+    priceDisplay: 'R749'
   },
 
   // Adventure Tours
@@ -175,7 +193,7 @@ export const tours = [
     description: 'See Table Mountain and the coastline from the sky. Experience breathtaking aerial views of Cape Town, the Twelve Apostles, and the Atlantic coastline.',
     category: 'adventure',
     images: ['/images/HelicopterTour.jpg'],
-    price: 'Costume'
+    price: 'Custom Price'
   },
   {
     id: 22,
@@ -200,14 +218,6 @@ export const tours = [
     category: 'adventure',
     images: ['/images/plane-tour.jpg'],
     price: 'Custom Price'
-  },
-  {
-    id: 25,
-    name: 'Testing Payment Method',
-    description: 'See the city and the coast from the sky. Experience breathtaking aerial views of Cape Town, the Twelve Apostles, and the Atlantic coastline.',
-    category: 'adventure',
-    images: ['/images/plane-tour.jpg'],
-    price: '$0.01'
   },
 
 ];

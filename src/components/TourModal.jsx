@@ -4,12 +4,15 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { PriceDisplay } from './ui/PriceDisplay';
+import { useCurrency } from '../contexts/CurrencyContext';
 import '../styles/TourModal.css';
 import handlePayment from '../yoco';
 
 const TourModal = ({ tour, isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [guests, setGuests] = useState(1);
+  const { formatPrice: formatCurrency } = useCurrency();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -113,19 +116,9 @@ const TourModal = ({ tour, isOpen, onClose }) => {
   const isFormValid = Object.keys(validationErrors).length === 0;
   
   // Format price for display (with currency symbol)
-  const currencyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat('en-ZA', {
-        style: 'currency',
-        currency: 'ZAR',
-        minimumFractionDigits: 2,
-      }),
-    []
-  );
-
   const formatPrice = useCallback(
-    (amount) => currencyFormatter.format(Number.isFinite(amount) ? amount : 0),
-    [currencyFormatter]
+    (amount) => formatCurrency(amount),
+    [formatCurrency]
   );
 
   // Start Yoco Checkout by calling handlePayment helper
@@ -231,13 +224,17 @@ const TourModal = ({ tour, isOpen, onClose }) => {
 
             {/* Scrollable Content */}
             <div className="modal-content">
-              <h2 className="modal-title">{tour.name}</h2>
-              <p className="modal-description">{tour.description}</p>
-
-              <div className="price-tags">
-                <span className="price-badge">{tour.price} per person</span>
-                <span className="category-badge">{tour.category}</span>
+            <div className="flex justify-between items-start">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{tour.name}</h2>
+              <div className="text-2xl font-bold text-primary">
+                <PriceDisplay price={tour.price} />
+                <span className="text-sm font-normal text-gray-500 dark:text-gray-400 block">per person</span>
               </div>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-300 my-4">{tour.description}</p>
+
+            <div className="mt-6 space-y-4">
 
               {/* Booking Section */}
               <div className="booking-section visible-booking">
@@ -390,15 +387,13 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                   <div className="price-breakdown">
                     <div className="price-line">
                       <span>Base Price (per person):</span>
-                      <span>{formatPrice(basePrice)}</span>
+                      <PriceDisplay price={tour.price} />
                     </div>
-                    <div className="price-line">
-                      <span>Number of Guests:</span>
-                      <span>{guests}</span>
-                    </div>
-                    <div className="price-line total-line">
-                      <strong>Total Amount:</strong>
-                      <strong>{formatPrice(totalPrice)}</strong>
+                    <div className="flex items-center justify-between border-t pt-4 mt-4">
+                      <span className="text-lg font-semibold">Total for {guests} {guests === 1 ? 'person' : 'people'}:</span>
+                      <div className="text-xl font-bold text-primary">
+                        <PriceDisplay price={tour.price * guests} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -443,12 +438,13 @@ const TourModal = ({ tour, isOpen, onClose }) => {
                     </p>
                   </div>
                 )}
-      </div>
-    </div>
-          </motion.div>
+              </div>
+            </div>
+          </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </motion.div>
+    )}
+  </AnimatePresence>
   );
 };
 

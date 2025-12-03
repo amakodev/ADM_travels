@@ -1,6 +1,8 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { tours, categoryLabels } from '../data/tours';
+import { CurrencyToggle } from './ui/CurrencyToggle';
+import { PriceDisplay } from './ui/PriceDisplay';
 import '../styles/Tour.css';
 
 // Lazy load TourModal since it includes heavy dependencies (framer-motion, react-datepicker, payment integrations)
@@ -94,21 +96,29 @@ const Tours = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="tour-filter-bar">
-            {filterOptions.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                onClick={() => handleFilterChange(filter.key)}
-                className={
-                  filter.key === activeFilter
-                    ? 'tour-filter-button tour-filter-button--active'
-                    : 'tour-filter-button'
-                }
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div className="w-full flex flex-col items-center mb-8 gap-4">
+            <div className="w-full md:w-auto">
+              <div className="tour-filter-bar">
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => handleFilterChange(filter.key)}
+                    className={
+                      filter.key === activeFilter
+                        ? 'tour-filter-button tour-filter-button--active'
+                        : 'tour-filter-button'
+                    }
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm mt-2 md:mt-0">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Currency:</span>
+              <CurrencyToggle />
+            </div>
           </div>
 
           <div className="tour-grid">
@@ -136,19 +146,28 @@ const Tours = () => {
                     onLoad={handleImageLoadedOrError}
                   />
                 </div>
-                <div className="tour-info">
-                  <span className="tour-category-tag">
-                    {categoryLabels[tour.category] || 'Other'}
-                  </span>
-                  <h3>{tour.name}</h3>
-                  <p>{tour.description}</p>
-                  <button
-                    type="button"
-                    className="tour-cta-button"
-                    onClick={() => handleTourClick(tour)}
-                  >
-                    View Tour
-                  </button>
+                <div className="tour-info flex flex-col h-full">
+                  <div className="flex-grow">
+                    <span className="tour-category-tag">
+                      {categoryLabels[tour.category] || 'Other'}
+                    </span>
+                    <h3 className="text-xl font-semibold mb-2">{tour.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-300">{tour.description}</p>
+                  </div>
+                  <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="text-xl font-bold text-primary">
+                        <PriceDisplay price={tour.price} />
+                      </div>
+                      <button
+                        type="button"
+                        className="tour-cta-button w-full sm:w-auto min-w-[120px] text-center"
+                        onClick={() => handleTourClick(tour)}
+                      >
+                        View Tour
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
