@@ -106,3 +106,4 @@ export const useCurrency = () => {
 };
 
 export default CurrencyContext;
+//too cool
