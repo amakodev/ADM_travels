@@ -21,7 +21,7 @@ export const CurrencyToggle = () => {
         </span>
       </Button>
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive">"using default rate ($1 = ZAR18)"</p>
       )}
       <p className="text-xs text-muted-foreground">
         All charges are processed in ZAR. USD values are estimates based on live exchange rates.
