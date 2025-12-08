@@ -35,19 +35,24 @@ export const CurrencyProvider = ({ children }) => {
     setError(null);
     
     try {
-      const response = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=ZAR');
-      if (!response.ok) throw new Error('Failed to fetch exchange rate');
+      //Requires Access  Key
+      // const response = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=ZAR');
+      // if (!response.ok) throw new Error('Failed to fetch exchange rate');
       
-      const data = await response.json();
-      const rate = data.rates.ZAR;
+      // const data = await response.json();
+      // const rate = data.rates.ZAR;
       
-      // Cache the new rate
-      localStorage.setItem(FX_RATE_CACHE_KEY, JSON.stringify({
-        rate,
-        timestamp: now
-      }));
+      // // Cache the new rate
+      // localStorage.setItem(FX_RATE_CACHE_KEY, JSON.stringify({
+      //   rate,
+      //   timestamp: now
+      // }));
       
-      setExchangeRate(rate);
+      // setExchangeRate(rate);
+
+      //SetDefault
+      setExchangeRate(18.0);
+      
     } catch (err) {
       console.error('Error fetching exchange rate:', err);
       setError('Failed to load exchange rates. Using default conversion.');
